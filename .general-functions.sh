@@ -450,12 +450,12 @@ delete_temp_folder(){
   
   [[ ${MAINTAIN_TMP_DATA} == 1 ]] && 
     { 
-      log_to_warn "${FUNCNAME[0]}(): Not deleting temporal data [${TMP_DIR}]."; 
+      log_to_warn "${FUNCNAME[0]}(): Not deleting temporal data [$(dirname ${TMP_DIR})]."; 
       log_to_warn "${FUNCNAME[0]}(): Use '${0} --purge-tmp-dirs' to delete it (and all other existing ones)."; 
       return 0; 
     }
   
-  [[ -n ${TMP_DIR} ]] && [[ -e ${TMP_DIR} ]] && { rm -rf $(dirname ${TMP_DIR}) ; }
+  [[ -n ${TMP_DIR} ]] && [[ -e $(dirname ${TMP_DIR}) ]] && { rm -rf $(dirname ${TMP_DIR}) ; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
   return 0
@@ -479,9 +479,9 @@ delete_temp_folder(){
 purge_temp_folders(){
   log_to_debug "${FUNCNAME[0]}():"
   
-  [[ -e ${SYS_TMP_DIR} ]] && { 
+  [[ -e ${SYS_TMP_DIR} ]] && {
     for cur_folder in $(ls -d ${SYS_TMP_DIR}/${TMP_DIR_TEMPLATE}* 2> /dev/null)
-    do      
+    do
       log_to_warn "${FUNCNAME[0]}(): Deleting ${cur_folder}" 
       rm -rf ${cur_folder} 
     done
