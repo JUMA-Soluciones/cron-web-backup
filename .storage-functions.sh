@@ -194,7 +194,7 @@ function storage_download_content_disabled(){
 #######################################
 
 function storage_download_content_sftp(){
-  log_to_debug "${FUNCNAME[0]}():"
+  log_to_debug "${FUNCNAME[0]}('${1}','${2}'):"
   origin_path=${1}
   [[ -n ${2} ]] && { origin_path=${1}/${2}; }
   
@@ -233,7 +233,7 @@ function storage_download_content_sftp(){
 #######################################
 
 function storage_download_content_ftp(){
-  log_to_debug "${FUNCNAME[0]}():"
+  log_to_debug "${FUNCNAME[0]}('${1}','${2}'):"
 
   [[ -z ${2} ]] && 
     { wget_cmd="wget --quiet --directory-prefix=${OUTPUT_STORAGE_PATH} --mirror "; origin_path=${1}; } ||
@@ -267,7 +267,7 @@ function storage_download_content_ftp(){
 #   error.
 #######################################
 
-function storage_download_content_local(){
+function storage_download_content_local('${1}','${2}'){
   log_to_debug "${FUNCNAME[0]}():"
   origin_path=${1}
   
@@ -300,7 +300,7 @@ function storage_download_content_local(){
 #######################################
 
 function storage_download_content(){
-  log_to_debug "${FUNCNAME[0]}(${STORAGE_PROTOCOL}):"
+  log_to_debug "${FUNCNAME[0]}('${1}', '${2}'):"
   
   storage_download_content_${STORAGE_PROTOCOL} "${1}" "${2}"
   [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Testing ${STORAGE_PROTOCOL} storage connection"; return 1; }
