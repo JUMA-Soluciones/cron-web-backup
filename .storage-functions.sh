@@ -267,8 +267,8 @@ function storage_download_content_ftp(){
 #   error.
 #######################################
 
-function storage_download_content_local('${1}','${2}'){
-  log_to_debug "${FUNCNAME[0]}():"
+function storage_download_content_local(){
+  log_to_debug "${FUNCNAME[0]}('${1}','${2}'):"
   origin_path=${1}
   
   cp -a ${origin_path} ${OUTPUT_STORAGE_PATH}/

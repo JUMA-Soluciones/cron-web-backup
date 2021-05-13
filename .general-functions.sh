@@ -382,7 +382,7 @@ initialize_backup() {
   
   [[ ${STORAGE_PROTOCOL} == local ]] && { STORAGE_HOST=$(hostname); }
   
-  log_to_info "${FUNCNAME[0]}(): Creating temporal directory \"${TMP_DIR}\""
+  log_to_info "${FUNCNAME[0]}(): Creating temporal directory \"$(dirname ${TMP_DIR})\""
   mkdir -p ${TMP_DIR}/${STORAGE_HOST}
   
   
