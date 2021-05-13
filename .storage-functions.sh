@@ -58,7 +58,7 @@ function storage_test_connection_sftp(){
   [[ -n ${STORAGE_PASS} ]] && { log_to_warn "${FUNCNAME[0]}(): STORAGE_PROTOCOL(SFTP): SFTP only allows public key authentication. STORAGE_PASS wont be used."; }
   
   sftp_command="sftp  -oStrictHostKeyChecking=no -P ${STORAGE_PORT} -b - ${STORAGE_USER}@${STORAGE_HOST}"
-  echo "ls ${remote_folder}" | ${sftp_command} > /dev/null  
+  echo "ls ${remote_folder}" | ${sftp_command} > /dev/null 
   [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(SFTP): Could not find backup folder [${remote_folder}]."; return 1; }
 
   log_to_info "${FUNCNAME[0]}(): OK"
@@ -86,7 +86,7 @@ function storage_test_connection_sftp(){
 
 function storage_test_connection_ftp(){
   log_to_debug "${FUNCNAME[0]}():"
-  remote_folder=${1}
+  local remote_folder=${1}
   
   [[ -z ${STORAGE_USER} || -z ${STORAGE_PASS} ]] && 
     { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(FTP): FTP protocol requires username and password."; return 1; }
@@ -115,7 +115,7 @@ function storage_test_connection_ftp(){
 
 function storage_test_connection_local(){
   log_to_debug "${FUNCNAME[0]}():"
-  remote_folder=${1}
+  local remote_folder=${1}
   
   ls ${remote_folder} > /dev/null 2>&1
   [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(LOCAL): Could not find backup folder [${remote_folder}].";  return 1; }
@@ -146,7 +146,7 @@ function storage_test_connection(){
   for cur_folder in "${BACKUP_FOLDERS[@]}"
   do
     storage_test_connection_${STORAGE_PROTOCOL} ${cur_folder}    
-    ret_value=$?
+    local ret_value=$?
     [[ ${ret_value} != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Testing ${STORAGE_PROTOCOL} storage connection"; return ${ret_value}; }
   done
   
@@ -195,11 +195,11 @@ function storage_download_content_disabled(){
 
 function storage_download_content_sftp(){
   log_to_debug "${FUNCNAME[0]}('${1}','${2}'):"
-  origin_path=${1}
+  local origin_path=${1}
   [[ -n ${2} ]] && { origin_path=${1}/${2}; }
   
   sftp -r -q -P ${STORAGE_PORT} ${STORAGE_USER}@${STORAGE_HOST}:${origin_path} ${OUTPUT_STORAGE_PATH} > /dev/null
-  [[ $? != 0 ]] && return 1
+  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(${STORAGE_PROTOCOL}): Could not download contents"; return 1; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
   return 0
@@ -234,13 +234,14 @@ function storage_download_content_sftp(){
 
 function storage_download_content_ftp(){
   log_to_debug "${FUNCNAME[0]}('${1}','${2}'):"
-
+  local origin_path=""
+  
   [[ -z ${2} ]] && 
     { wget_cmd="wget --quiet --directory-prefix=${OUTPUT_STORAGE_PATH} --mirror "; origin_path=${1}; } ||
     { wget_cmd="wget --quiet --directory-prefix=${OUTPUT_STORAGE_PATH} "; origin_path=${1}/${2}; } 
   
   ${wget_cmd} "ftp://${STORAGE_USER}:${STORAGE_PASS}@${STORAGE_HOST}:${STORAGE_PORT}/${origin_path}"
-  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(${STORAGE_PROTOCOL}): Could not download FTP contents"; return 1; }
+  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(${STORAGE_PROTOCOL}): Could not download contents"; return 1; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
   return 0
@@ -269,10 +270,10 @@ function storage_download_content_ftp(){
 
 function storage_download_content_local(){
   log_to_debug "${FUNCNAME[0]}('${1}','${2}'):"
-  origin_path=${1}
+  local origin_path=${1}
   
   cp -a ${origin_path} ${OUTPUT_STORAGE_PATH}/
-  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(${STORAGE_PROTOCOL}): Could not get contents"; return 1; }
+  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): STORAGE_PROTOCOL(${STORAGE_PROTOCOL}): Could not download contents"; return 1; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
   return 0
@@ -303,7 +304,7 @@ function storage_download_content(){
   log_to_debug "${FUNCNAME[0]}('${1}', '${2}'):"
   
   storage_download_content_${STORAGE_PROTOCOL} "${1}" "${2}"
-  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Testing ${STORAGE_PROTOCOL} storage connection"; return 1; }
+  [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Downloading contents over ${STORAGE_PROTOCOL}"; return 1; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
   return 0
@@ -333,6 +334,7 @@ function storage_download_contents(){
   for cur_folder in "${BACKUP_FOLDERS[@]}"
   do
     storage_download_content "$cur_folder"
+    [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Downloading contents over ${STORAGE_PROTOCOL}"; return 1; }
   done
   
   log_to_info "${FUNCNAME[0]}(): $(du -sh ${TMP_DIR}/${STORAGE_HOST} | cut -f 1) received: OK"

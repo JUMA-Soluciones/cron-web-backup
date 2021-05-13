@@ -28,7 +28,7 @@
 
 cd "$(dirname "$0")"
 
-start_time=`date +%s`
+START_TIME=`date +%s`
 
 source .log-functions.sh
 source .general-functions.sh

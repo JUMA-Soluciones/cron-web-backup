@@ -69,8 +69,8 @@ function exit_app()
   
   if [[ ${LOG_PROFILE} == 1 ]] 
   then
-    end_time=`date +%s`
-    run_time=$((end_time-start_time))
+    local end_time=`date +%s`
+    local run_time=$((end_time-START_TIME))
     log_to_info "PROFILING: '${BACKUP_NAME}' backup finished in ${run_time} seconds" force
   fi
 
@@ -126,7 +126,7 @@ function load_configuration() {
         ;;
         -c|--config-file)
         [[ -z "${2}" ]] && return 1
-        config_file=${2}
+        local config_file=${2}
         [[ ! -e ${config_file} ]] && 
           { log_to_error "${FUNCNAME[0]}(): Unable to locate config file at ${config_file}"; return 1; }
         shift 2 
@@ -269,7 +269,7 @@ function load_configuration() {
       [[ ${LOG_LEVEL,,} != debug ]] &&
       [[ -n ${LOG_LEVEL} ]]
   then
-    log_to_warn "\"${LOG_LEVEL}\" in not valid log level. Changing to \"debug\""
+    log_to_warn "\"${LOG_LEVEL}\" is not valid log level. Defaulting to \"debug\""
     LOG_LEVEL=debug
   fi
   
@@ -389,13 +389,16 @@ initialize_backup() {
   if [[ ${DB_PROTOCOL} == wp-config ]]
   then
     storage_download_wp-config
-    [[ $? != 0 ]] && return 1
+    local ret_value=$?
+    [[ ${ret_value} != 0 ]] && return ${ret_value}
     
     ddbb_read_wp-config
-    [[ $? != 0 ]] && return 2
+    ret_value=$?
+    [[ ${ret_value} != 0 ]] && return ${ret_value}
     
     ddbb_test_connection
-    [[ $? != 0 ]] && return 3
+    ret_value=$?
+    [[ ${ret_value} != 0 ]] && return ${ret_value}
   fi
   
   log_to_info "${FUNCNAME[0]}(): OK"
@@ -419,7 +422,7 @@ pack_backup_contents(){
   log_to_debug "${FUNCNAME[0]}():"
   
   tar cfvz ${OUTPUT_TAR} -C $(dirname ${TMP_DIR}) ${BACKUP_NAME} > /dev/null
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && 
     { 
       log_to_error "${FUNCNAME[0]}(): tar command exited with non zero status"
@@ -484,6 +487,8 @@ purge_temp_folders(){
     do
       log_to_warn "${FUNCNAME[0]}(): Deleting ${cur_folder}" 
       rm -rf ${cur_folder} 
+      local ret_value=$?
+      [[ ${ret_value} != 0 ]] && return ${ret_value}
     done
   }
   

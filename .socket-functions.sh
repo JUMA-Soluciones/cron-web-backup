@@ -72,7 +72,7 @@ open_port_redirection() {
     { log_to_error "${FUNCNAME[0]}(): The file ${control_socket} already exists."; return 1; }
   
   ssh -f -M -S ${control_socket} -N -L ${4}:${5}:${6} -p ${2} ${3}@${1}
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Could not connect open a socket with: ${1} ${2} ${3} ${4} ${5} ${6}"; return 1; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
@@ -107,7 +107,7 @@ close_port_redirection() {
     { log_to_error "${FUNCNAME[0]}(): The file ${control_socket} does not exists."; return 1; }
     
   ssh -O stop -q -S ${control_socket} ${3}@${1}
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && { log_to_warn "${FUNCNAME[0]}(): Error closing the control socket."; return ${ret_value}; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
@@ -135,7 +135,7 @@ get_free_port() {
   read lower_port upper_port < /proc/sys/net/ipv4/ip_local_port_range
   increment=1
 
-  cur_port=${lower_port}
+  local  cur_port=${lower_port}
   ip_port_free=$(netstat -tapln 2> /dev/null | grep ":$cur_port" )
 
   while [[ -n "$ip_port_free" ]]; do

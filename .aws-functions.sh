@@ -43,26 +43,26 @@ function aws_test_connection() {
   log_to_debug "${FUNCNAME[0]}():"
   [[ -z ${AWS_BUCKET} ]] && { log_to_error "${FUNCNAME[0]}(): \$AWS_BUCKET is needed"  && return 1 ; }
   
-  AWS_S3_TEST_CMD="aws s3api list-buckets"
+  local aws_s3_test_cmd="aws s3api list-buckets"
   if [[ -n  ${AWS_CONNECTION_PROFILE} ]]
   then
     log_to_debug "${FUNCNAME[0]}(): Enabling \"${AWS_CONNECTION_PROFILE}\" profile"
-    AWS_S3_TEST_CMD="${AWS_S3_TEST_CMD} --profile ${AWS_CONNECTION_PROFILE}"
+    aws_s3_test_cmd="${aws_s3_test_cmd} --profile ${AWS_CONNECTION_PROFILE}"
   fi
   
   if [[ -n ${AWS_REGION} ]]
   then
     log_to_debug "${FUNCNAME[0]}(): Working on \"${AWS_REGION}\" region"
-    AWS_S3_TEST_CMD="${AWS_S3_TEST_CMD} --region ${AWS_REGION}"
+    aws_s3_test_cmd="${aws_s3_test_cmd} --region ${AWS_REGION}"
   fi
   
   log_to_debug "${FUNCNAME[0]}(): Checking aws-cli"
-  ${AWS_S3_TEST_CMD} > /dev/null
-  [[ $? -ne 0 ]] && { log_to_error "${FUNCNAME[0]}(): Error al ejecutar '${AWS_S3_TEST_CMD}'" && return 2 ; }
+  ${aws_s3_test_cmd} > /dev/null
+  [[ $? -ne 0 ]] && { log_to_error "${FUNCNAME[0]}(): Error al ejecutar '${aws_s3_test_cmd}'" && return 2 ; }
   
   log_to_debug "${FUNCNAME[0]}(): Checking if '${AWS_BUCKET}' bucket exists"
-  m_OUTPUT=$(${AWS_S3_TEST_CMD}  --query "Buckets[?Name=='${AWS_BUCKET}']" | wc -l )
-  [[ ${m_OUTPUT} -le 1 ]] && { log_to_error "${FUNCNAME[0]}(): '${AWS_BUCKET}' does not exist" && return 3 ; }
+  local m_output=$(${aws_s3_test_cmd}  --query "Buckets[?Name=='${AWS_BUCKET}']" | wc -l )
+  [[ ${m_output} -le 1 ]] && { log_to_error "${FUNCNAME[0]}(): '${AWS_BUCKET}' does not exist" && return 3 ; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
   return 0
@@ -93,27 +93,27 @@ function aws_test_connection() {
 function aws_upload_backup_file() {
   log_to_debug "${FUNCNAME[0]}():"
   
-  AWS_S3_PUT_CMD="aws s3api put-object --bucket ${AWS_BUCKET}"
+  local aws_s3_put_cmd="aws s3api put-object --bucket ${AWS_BUCKET}"
   if [[ -n  ${AWS_CONNECTION_PROFILE} ]]
   then
     log_to_debug "${FUNCNAME[0]}(): Enabling \"${AWS_CONNECTION_PROFILE}\" profile"
-    AWS_S3_PUT_CMD="${AWS_S3_PUT_CMD} --profile ${AWS_CONNECTION_PROFILE}"
+    aws_s3_put_cmd="${aws_s3_put_cmd} --profile ${AWS_CONNECTION_PROFILE}"
   fi
   
   if [[ -n ${AWS_REGION} ]]
   then
     log_to_debug "${FUNCNAME[0]}(): Working on \"${AWS_REGION}\" region"
-    AWS_S3_PUT_CMD="${AWS_S3_PUT_CMD} --region ${AWS_REGION}"
+    aws_s3_put_cmd="${aws_s3_put_cmd} --region ${AWS_REGION}"
   fi
   
   REMOTE_PATH=${BACKUP_NAME}/$(basename ${OUTPUT_TAR})
   log_to_debug "${FUNCNAME[0]}(): Uploading ${OUTPUT_TAR} to ${AWS_BUCKET}/${REMOTE_PATH}"
   
-  ${AWS_S3_PUT_CMD} --key ${REMOTE_PATH} --body ${OUTPUT_TAR} > /dev/null 2>&1
+  ${aws_s3_put_cmd} --key ${REMOTE_PATH} --body ${OUTPUT_TAR} > /dev/null 2>&1
   [[ $? -ne 0 ]] && { log_to_error "${FUNCNAME[0]}(): Error when uploading file to AWS" && return 2 ; }
   
-  m_MESSAGE="${FUNCNAME[0]}(): Uploaded $(basename ${OUTPUT_TAR}) [$(du -sh ${OUTPUT_TAR} | cut -f 1)] to s3://${AWS_BUCKET}/${BACKUP_NAME}: OK"
-  [[ ${LOG_PROFILE} == 1 ]] && { log_to_info "${m_MESSAGE}" force ; } || { log_to_info "${m_MESSAGE}" ; }
+  local m_message="${FUNCNAME[0]}(): Uploaded $(basename ${OUTPUT_TAR}) [$(du -sh ${OUTPUT_TAR} | cut -f 1)] to s3://${AWS_BUCKET}/${BACKUP_NAME}: OK"
+  [[ ${LOG_PROFILE} == 1 ]] && { log_to_info "${m_message}" force ; } || { log_to_info "${m_message}" ; }
   return 0
 }
 

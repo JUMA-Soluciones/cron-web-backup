@@ -63,11 +63,11 @@ ddbb_test_connection_mysql_disabled(){
 ddbb_test_connection_mysql_direct(){
   log_to_debug "${FUNCNAME[0]}(${1} ${2} ${3} ${5}):"
   
-  m_db_host=${DB_HOST}
-  m_db_port=${DB_PORT}
-  m_db_user=${DB_USER}
-  m_db_pass=${DB_PASS}
-  m_db_name=${DB_NAME}
+  local m_db_host=${DB_HOST}
+  local m_db_port=${DB_PORT}
+  local m_db_user=${DB_USER}
+  local m_db_pass=${DB_PASS}
+  local m_db_name=${DB_NAME}
   [[ -n ${1} ]] && { m_db_host=${1}; }
   [[ -n ${2} ]] && { m_db_port=${2}; }
   [[ -n ${3} ]] && { m_db_user=${3}; }
@@ -75,7 +75,7 @@ ddbb_test_connection_mysql_direct(){
   [[ -n ${5} ]] && { m_db_name=${5}; }
   
   mysql --user="${m_db_user}" --password="${m_db_pass}" --host="${m_db_host}" --port=${m_db_port} --database="${m_db_name}" --execute="\q" 2> /dev/null
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Could not connect to mysql ${m_db_host}:${m_db_port} ${m_db_user} ${m_db_name}" ; return ${ret_value}; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
@@ -102,7 +102,7 @@ ddbb_test_connection_mysql_storage-tunnel(){
   log_to_debug "${FUNCNAME[0]}():"
   
   ddbb_test_connection_mysql_ssh-tunnel "${STORAGE_HOST}" "${STORAGE_PORT}" "${STORAGE_USER}"
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Unable to test DDBB mysql connection"; return ${ret_value}; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
@@ -140,22 +140,22 @@ ddbb_test_connection_mysql_storage-tunnel(){
 ddbb_test_connection_mysql_ssh-tunnel(){
   log_to_debug "${FUNCNAME[0]}():"
   
-  m_ssh_tunnel_host=${SSH_TUNNEL_HOST}
-  m_ssh_tunnel_port=${SSH_TUNNEL_PORT}
-  m_ssh_tunnel_user=${SSH_TUNNEL_USER}
+  local m_ssh_tunnel_host=${SSH_TUNNEL_HOST}
+  local m_ssh_tunnel_port=${SSH_TUNNEL_PORT}
+  local m_ssh_tunnel_user=${SSH_TUNNEL_USER}
   
   [[ -n ${1} ]] && { m_ssh_tunnel_host=${1}; }
   [[ -n ${2} ]] && { m_ssh_tunnel_port=${2}; }
   [[ -n ${3} ]] && { m_ssh_tunnel_user=${3}; }
   
-  local_port=$(get_free_port)
-  redir_config="${m_ssh_tunnel_host} ${m_ssh_tunnel_port} ${m_ssh_tunnel_user} ${local_port} ${DB_HOST} ${DB_PORT}"
+  local local_port=$(get_free_port)
+  local redir_config="${m_ssh_tunnel_host} ${m_ssh_tunnel_port} ${m_ssh_tunnel_user} ${local_port} ${DB_HOST} ${DB_PORT}"
   
   open_port_redirection ${redir_config}
   [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Could not create port redirection to SSH host"; return 1; }
   
   ddbb_test_connection_mysql_direct "127.0.0.1" ${local_port} ${DB_USER} ${DB_PASS} ${DB_NAME}
-  ret_value=$?
+  local ret_value=$?
   
   close_port_redirection $redir_config
   
@@ -209,11 +209,11 @@ ddbb_test_connection_mysql_wp-config(){
 ddbb_get_contents_mysql_direct(){
   log_to_debug "${FUNCNAME[0]}('${1}', '${2}', '${3}', '${5}'):"
   
-  m_db_host=${DB_HOST}
-  m_db_port=${DB_PORT}
-  m_db_user=${DB_USER}
-  m_db_pass=${DB_PASS}
-  m_db_name=${DB_NAME}
+  local m_db_host=${DB_HOST}
+  local m_db_port=${DB_PORT}
+  local m_db_user=${DB_USER}
+  local m_db_pass=${DB_PASS}
+  local m_db_name=${DB_NAME}
   [[ -n ${1} ]] && { m_db_host=${1}; }
   [[ -n ${2} ]] && { m_db_port=${2}; }
   [[ -n ${3} ]] && { m_db_user=${3}; }
@@ -224,7 +224,7 @@ ddbb_get_contents_mysql_direct(){
   mysqldump --user="${m_db_user}" --password="${m_db_pass}" --host="${m_db_host}" --port=${m_db_port} \
     --triggers --routines --events --column-statistics=0 --databases "${m_db_name}" \
     > "${ddbb_output_file}" 2> /dev/null
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && 
     { log_to_error "${FUNCNAME[0]}(): Could not get data from host ${1}:${2} ${3} ${5}"; return ${ret_value}; }
   
@@ -264,22 +264,22 @@ ddbb_get_contents_mysql_direct(){
 ddbb_get_contents_mysql_ssh-tunnel(){
   log_to_debug "${FUNCNAME[0]}():"
   
-  m_ssh_tunnel_host=${SSH_TUNNEL_HOST}
-  m_ssh_tunnel_port=${SSH_TUNNEL_PORT}
-  m_ssh_tunnel_user=${SSH_TUNNEL_USER}
+  local m_ssh_tunnel_host=${SSH_TUNNEL_HOST}
+  local m_ssh_tunnel_port=${SSH_TUNNEL_PORT}
+  local m_ssh_tunnel_user=${SSH_TUNNEL_USER}
   
   [[ -n ${1} ]] && { m_ssh_tunnel_host=${1}; }
   [[ -n ${2} ]] && { m_ssh_tunnel_port=${2}; }
   [[ -n ${3} ]] && { m_ssh_tunnel_user=${3}; }
   
-  local_port=$(get_free_port)
-  redir_config="${m_ssh_tunnel_host} ${m_ssh_tunnel_port} ${m_ssh_tunnel_user} ${local_port} ${DB_HOST} ${DB_PORT}"
+  local local_port=$(get_free_port)
+  local redir_config="${m_ssh_tunnel_host} ${m_ssh_tunnel_port} ${m_ssh_tunnel_user} ${local_port} ${DB_HOST} ${DB_PORT}"
   
   open_port_redirection ${redir_config}
   [[ $? != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Could not create port redirection to SSH host"; return 1; }
   
   ddbb_get_contents_mysql_direct "127.0.0.1" "${local_port}" "${DB_USER}" "${DB_PASS}" "${DB_NAME}"
-  ret_value=$?
+  local ret_value=$?
   
   close_port_redirection $redir_config
   
@@ -310,7 +310,7 @@ ddbb_get_contents_mysql_storage-tunnel(){
   log_to_debug "${FUNCNAME[0]}():"
   
   ddbb_get_contents_mysql_ssh-tunnel "${STORAGE_HOST}" "${STORAGE_PORT}" "${STORAGE_USER}"
-  ret_value=$?
+  local ret_value=$?
   [[ ${ret_value} != 0 ]] && { log_to_error "${FUNCNAME[0]}(): Unable to get DDBB contents over mysql connection"; return ${ret_value}; }
   
   log_to_info "${FUNCNAME[0]}(): OK"
