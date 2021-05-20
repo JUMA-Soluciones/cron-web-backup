@@ -128,7 +128,7 @@ function load_configuration() {
         [[ -z "${2}" ]] && return 1
         local config_file=${2}
         [[ ! -e ${config_file} ]] && 
-          { log_to_error "${FUNCNAME[0]}(): Unable to locate config file at ${config_file}"; return 1; }
+          { log_to_error "${FUNCNAME[0]}(): Unable to locate config file at ${config_file}. Use absolute path."; return 1; }
         shift 2 
         ;;
         *)    # unknown option

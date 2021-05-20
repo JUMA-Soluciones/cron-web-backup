@@ -33,7 +33,7 @@ source .ddbb-functions_postgres.sh
 
 #######################################
 # Dummy debugging function.
-# 
+#
 # RETURN:
 #   Zero.
 #######################################
@@ -44,9 +44,23 @@ ddbb_test_connection_disabled_(){
 }
 
 
+
 #######################################
 # Dummy debugging function.
-# 
+#
+# RETURN:
+#   Zero.
+#######################################
+
+
+ddbb_test_connection_disabled_storage-tunnel(){
+  log_to_debug "${FUNCNAME[0]}():"
+  return 0
+}
+
+#######################################
+# Dummy debugging function.
+#
 # RETURN:
 #   Zero.
 #######################################
@@ -88,12 +102,26 @@ ddbb_test_connection(){
 
 #######################################
 # Dummy debugging function.
-# 
+#
 # RETURN:
 #   Zero.
 #######################################
 
 ddbb_get_contents_disabled_(){
+  log_to_debug "${FUNCNAME[0]}():"
+  return 0
+}
+
+
+
+#######################################
+# Dummy debugging function.
+#
+# RETURN:
+#   Zero.
+#######################################
+
+ddbb_get_contents_disabled_storage-tunnel(){
   log_to_debug "${FUNCNAME[0]}():"
   return 0
 }
